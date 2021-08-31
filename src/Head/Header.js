@@ -14,19 +14,28 @@ import {
   ListItemText,
   Tooltip,
 } from "@material-ui/core";
-import clsx from "clsx";
+// import clsx from "clsx";
 import GitHubIcon from "@material-ui/icons/GitHub";
 import NotificationsNoneOutlinedIcon from "@material-ui/icons/NotificationsNoneOutlined";
 import AddOutlinedIcon from "@material-ui/icons/AddOutlined";
 import AccountCircleOutlinedIcon from "@material-ui/icons/AccountCircleOutlined";
 
-import SearchIcon from "@material-ui/icons/Search";
+import Button from "@material-ui/core/Button";
+import ButtonGroup from "@material-ui/core/ButtonGroup";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+
+import Paper from "@material-ui/core/Paper";
+import Popper from "@material-ui/core/Popper";
+import MenuItem from "@material-ui/core/MenuItem";
+import MenuList from "@material-ui/core/MenuList";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    backgroundColor: "#272727",
+    backgroundColor: "#161b22", //"rgb(121, 184, 255)",  #272727
     display: "flex",
     color: "white",
+    // padding: "12px"
   },
   searchInput: {
     opacity: "0.6",
@@ -64,8 +73,38 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const options = ["Add from your device", "Add from cloud"];
+
 function Header() {
   const classes = useStyles();
+
+  //used for dropdown
+  const [open, setOpen] = React.useState(false);
+  const anchorRef = React.useRef(null);
+  const [selectedIndex, setSelectedIndex] = React.useState(1);
+
+  const handleClick = () => {
+    console.info(`You clicked ${options[selectedIndex]}`);
+  };
+
+  const handleMenuItemClick = (event, index) => {
+    setSelectedIndex(index);
+    setOpen(false);
+  };
+
+  const handleToggle = () => {
+    setOpen((prevOpen) => !prevOpen);
+  };
+
+  const handleClose = (event) => {
+    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+      return;
+    }
+
+    setOpen(false);
+  };
+  //upper portion used for dropdown
+
   return (
     <Grid container alignItems="center" className={classes.root}>
       <Grid item>
@@ -98,7 +137,7 @@ function Header() {
           <IconButton>
             <Badge badgeContent={4} color="primary">
               <NotificationsNoneOutlinedIcon
-                fontSize="medium"
+                fontSize="small"
                 className={classes.icon}
               />
             </Badge>
@@ -106,24 +145,54 @@ function Header() {
         </Tooltip>
 
         <IconButton>
-          <Badge badgeContent={5} color="secondary">
-            <Tooltip title="add from ...">
-              <AddOutlinedIcon fontSize="medium" className={classes.icon} />
-            </Tooltip>
-          </Badge>
+          <ButtonGroup ref={anchorRef}>
+            {/* <Button onClick={handleClick}>
+              
+            </Button> */}
+            <Button size="small" onClick={handleToggle}>
+              <AddOutlinedIcon className={classes.icon} />
+              <ArrowDropDownIcon className={classes.icon} />
+            </Button>
+          </ButtonGroup>
+          <Popper
+            open={open}
+            anchorEl={anchorRef.current}
+            role={undefined}
+            transition
+            disablePortal
+          >
+            {() => (
+              <Paper>
+                <ClickAwayListener onClickAway={handleClose}>
+                  <MenuList id="split-button-menu">
+                    {options.map((option, index) => (
+                      <MenuItem
+                        key={option}
+                        onClick={(event) => handleMenuItemClick(event, index)}
+                      >
+                        {option}
+                      </MenuItem>
+                    ))}
+                  </MenuList>
+                </ClickAwayListener>
+              </Paper>
+            )}
+          </Popper>
         </IconButton>
 
         <Tooltip title="User">
           <IconButton>
+          <Badge color="secondary" badgeContent=" " variant="dot">
             <AccountCircleOutlinedIcon
-              fontSize="medium"
+              fontSize="small"
               className={classes.icon}
             />
+            </Badge>
+            <ArrowDropDownIcon className={classes.icon} />
           </IconButton>
         </Tooltip>
       </Grid>
     </Grid>
   );
 }
-
 export default Header;
